@@ -1,0 +1,185 @@
+import tensorflow as tf
+
+
+class Estimator:
+
+    def __init__(self, config, params=None, **kwargs):
+        '''Build Estimator
+
+        Args:
+            config (RunConfig): RunConfig object.
+            params: model's paramerters.
+        '''
+        self.params = params
+        self.estimator = tf.estimator.Estimator(
+            model_fn=self.model_fn,
+            config=config,
+            params=params
+        )
+
+    def forward(self, features, labels, mode, params):
+        '''Model forward function
+
+        Args:
+            features (Tensor): features fed into the estimator.
+            labels (Tensor): labels fed into the estimator.
+            mode (tf.estimator.ModeKeys): a parameter controls the mode.
+            params (object): model's params.
+
+        Returns:
+            logits (Tensor): output logits.
+        '''
+        {% if use_example == 'iris' %}
+        with tf.name_scope('hidden_layers'):
+            net = tf.layers.dense(features, 10, activation=tf.nn.relu)
+            net = tf.layers.dense(net, 10, activation=tf.nn.relu)
+
+        with tf.name_scope('output_layer'):
+            net = tf.layers.dense(net, 3)
+
+        return net
+        {% else %}
+        return NotImplemented
+        {% endif %}
+
+    def input_fn(self, data, mode=tf.estimator.ModeKeys.TRAIN):
+        '''Data input pipeline
+        
+        Args:
+            data (iterable object): An iterable object contains (features, labels) tuples.
+
+        Returns:
+            (tf.data.Dataset): `tf.data.Dataset` object.
+        '''
+        if mode == tf.estimator.ModeKeys.TRAIN:
+            {% if use_example == 'iris' %}
+            dataset = tf.data.Dataset.from_tensor_slices(data)
+            dataset = dataset.repeat(self.params['num_epochs']).batch(self.params['batch_size']).prefetch(self.params['batch_size'])
+
+            return dataset
+            {% else %}
+            return NotImplemented
+            {% endif %}
+
+        elif mode == tf.estimator.ModeKeys.EVAL:
+            {% if use_example == 'iris' %}
+            dataset = tf.data.Dataset.from_tensor_slices(data)
+            dataset = dataset.repeat(self.params['num_epochs']).batch(self.params['batch_size']).prefetch(self.params['batch_size'])
+
+            return dataset
+            {% else %}
+            return NotImplemented
+            {% endif %}
+
+        elif mode == tf.estimator.ModeKeys.PREDICT:
+            return NotImplemented
+
+        else:
+            raise Exception('Invalid ModeKey.')
+
+    def get_spec(self, train_data, eval_data=None):
+        train_spec = tf.estimator.TrainSpec(
+            input_fn=lambda: self.input_fn(train_data)
+        )
+        
+        if eval_data:
+            eval_spec = tf.estimator.EvalSpec(
+                input_fn=lambda: self.input_fn(eval_data, mode=tf.estimator.ModeKeys.EVAL)
+            )
+
+            return train_spec, eval_spec
+        
+        return train_spec
+
+    def model_fn(self, features, labels, mode, params):
+        '''Build the model structure
+
+        Args:
+            features (Tensor): features fed into the estimator.
+            labels (Tensor): labels fed into the estimator.
+            mode (tf.estimator.ModeKeys): a parameter controls the mode.
+            params (object): model's params.
+
+        Returns:
+            (tf.estimator.EstimatorSpec): spec fed into the estimator.
+        '''
+        # initialize opt, loss, prediction, metrics for switching the condition.
+        train_op, loss, predictions, eval_metric_ops = None, None, None, {}
+
+        # feedforward networks.
+        logits = self.forward(features, labels, mode, params)
+
+        # define the loss, opt, metrics, etc.
+        if mode == tf.estimator.ModeKeys.TRAIN:
+            {% if use_example == 'iris' %}
+            loss = tf.losses.softmax_cross_entropy(tf.one_hot(labels, depth=3), logits)
+            opt = tf.train.AdamOptimizer(learning_rate=params['learning_rate'])
+            train_op = opt.minimize(loss, global_step=tf.train.get_global_step())
+            {% else %}
+            pass
+            {% endif %}
+        
+        if mode == tf.estimator.ModeKeys.EVAL:
+            {% if use_example == 'iris' %}
+            loss = tf.losses.softmax_cross_entropy(tf.one_hot(labels, depth=3), logits)
+            eval_metric_ops = {
+                'accuracy': tf.metrics.accuracy(
+                    tf.one_hot(labels, depth=3), tf.one_hot(tf.argmax(logits, axis=1), depth=3), name='accuracy'),
+                'precision': tf.metrics.precision(
+                    tf.one_hot(labels, depth=3), tf.one_hot(tf.argmax(logits, axis=1), depth=3), name='precision'),
+                'recall': tf.metrics.recall(
+                    tf.one_hot(labels, depth=3), tf.one_hot(tf.argmax(logits, axis=1), depth=3), name='recall'),
+                'f1_score': tf.contrib.metrics.f1_score(
+                    tf.one_hot(labels, depth=3), tf.one_hot(tf.argmax(logits, axis=1), depth=3), name='f1_score')
+            }
+            {% else %}
+            pass
+            {% endif %}
+
+        if mode == tf.estimator.ModeKeys.PREDICT:
+            {% if use_example == 'iris' %}
+            predictions = tf.one_hot(tf.argmax(logits, axis=1), depth=3)
+            {% else %}
+            pass
+            {% endif %}
+        
+        return tf.estimator.EstimatorSpec(
+            mode=mode,
+            train_op=train_op,
+            loss=loss,
+            predictions=predictions,
+            eval_metric_ops=eval_metric_ops
+        )
+
+    def train(self, train_data, eval_data=None):
+        '''Train the estimator
+
+        Args:
+            train_data (np.array): training data.
+            eval_data (np.array): evaluating data.
+        '''
+        if eval_data:
+            train_spec, eval_spec = self.get_spec(train_data, eval_data)
+            tf.estimator.train_and_evaluate(
+                estimator=self.estimator, 
+                train_spec=train_spec, 
+                eval_spec=eval_spec)
+
+        else:
+            self.estimator.train(
+                input_fn=lambda: self.input_fn(train_data))
+
+    def predict(self, data):
+        '''Predict by the estimator
+
+        Args:
+            data (np.array): data fed into the estimator.
+
+        Returns:
+            labels (np.array): estimator's prediction.
+        '''
+        labels = self.estimator.predict(
+            input_fn=lambda: self.input_fn(data, mode=tf.estimator.ModeKeys.PREDICT)
+        )
+
+        return labels

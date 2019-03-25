@@ -1,0 +1,56 @@
+import tensorflow as tf
+from argparse import ArgumentParser
+from {{ app_name }} import Estimator
+{% if use_example %}
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+{% endif %}
+
+
+def get_args():
+    arg_parser = ArgumentParser()
+    arg_parser.add_argument('--learning_rate', type=float, default=0.01, dest='learning_rate')
+    arg_parser.add_argument('--batch_size', type=int, default=32, dest='batch_size')
+    arg_parser.add_argument('--test_size', type=float, default=0.2, dest='test_size')
+    arg_parser.add_argument('--num_epochs', type=int, default=100, dest='num_epochs')
+    arg_parser.add_argument('--save_ckpt_steps', type=int, default=5, dest='save_ckpt_steps')
+    arg_parser.add_argument('--model_dir', type=str, default='./models/', dest='model_dir')
+
+    return vars(arg_parser.parse_args())
+
+def main(**kwargs):
+    '''
+    Main function of training a `tf.estimator.Estimator`
+    '''
+    config = tf.estimator.RunConfig(
+        model_dir=kwargs.get('model_dir'),
+        save_checkpoints_steps=kwargs.get('save_ckpt_steps'),
+    )
+
+    hparams = {
+        'learning_rate': kwargs.get('learning_rate'),
+        'batch_size': kwargs.get('batch_size'),
+        'num_epochs': kwargs.get('num_epochs'),
+    }
+
+    estimator = Estimator(
+        config=config,
+        params=hparams
+    )
+
+    # load dataset 
+    {% if use_example == 'iris' %}
+    features, labels = load_iris(return_X_y=True)
+    train_X, test_X, train_y, test_y = train_test_split(features, labels, test_size=kwargs.get('test_size'))
+    train_data = (train_X, train_y)
+    eval_data = (test_X, test_y)
+    {% endif %}
+
+    # train the estimator
+    {% if use_example == 'iris' %}
+    estimator.train(train_data=train_data, eval_data=eval_data)
+    {% endif %}
+
+if __name__ == "__main__":
+    kwargs = get_args()
+    main(**kwargs)
