@@ -40,7 +40,7 @@ train_data = (train_X, train_y)
 eval_data = (test_X, test_y)
 ```
 
-In `iris_net/__init__.py`, we already defined the `input_fn`, `forward`, `model_fn` which you need to custom design if you create an empty project.
+In `iris_net/__init__.py`, we already defined the `input_fn`, `forward`, `model_fn` which you need to design by yourself if you create an empty project.
 
 `input_fn` function,
 ```python
@@ -74,7 +74,7 @@ with tf.name_scope('output_layer'):
 return net
 ```
 
-`model_fn' function,
+`model_fn` function,
 ```python
 if mode == tf.estimator.ModeKeys.TRAIN:
     
