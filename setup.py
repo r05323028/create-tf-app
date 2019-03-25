@@ -8,7 +8,7 @@ create-tf-app=create_tf_app.bin.cli:cli
 
 setup(
     name='create_tf_app',
-    version='0.0.1',
+    version='0.0.2',
     install_requires=[
         'Jinja2==2.10',
         'Click==7.0',
