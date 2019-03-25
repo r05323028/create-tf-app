@@ -103,7 +103,7 @@ if mode == tf.estimator.ModeKeys.PREDICT:
     predictions = tf.one_hot(tf.argmax(logits, axis=1), depth=3)
 ```
 
-Finally, just use python sript to train the model.
+Finally, just use python script to train the model.
 
 ```
 python train.py
