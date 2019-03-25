@@ -14,6 +14,8 @@ setup(
         'Click==7.0',
         'tqdm==4.23.4'
     ],
+    description='Command line tool to create tensorflow project based on the high-level api.',
+    url='https://github.com/r05323028/create-tf-app',
     include_package_data=True,
     packages=find_packages(include=['create_tf_app.*', '*']),
     author='seanchang',

@@ -2,6 +2,12 @@
 
 This python package is used to create tensorflow side project.
 
+## Installation
+
+```
+pip install create_tf_app
+```
+
 ## Create side project 
 
 After installing this package by `pip`, you can simply use `create-tf-app` cli to create a tensorflow app which uses the newest high-level api (i.e. `tf.data.Dataset` and `tf.estimator.Estimator`).
