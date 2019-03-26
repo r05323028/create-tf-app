@@ -108,3 +108,7 @@ Finally, just use python script to train the model.
 ```
 python train.py
 ```
+
+Then, you can use `tensorboard --logdir=models` to check the metrics on `localhost:6006` by default.
+
+![tensorboard example](img/tensorboard_example.png)
