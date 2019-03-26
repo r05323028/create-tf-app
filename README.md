@@ -1,6 +1,6 @@
 # Create TF App Command Line Tools
 
-This python package is used to create tensorflow side project.
+This python package is used to create a tensorflow side project.
 
 ## Installation
 
@@ -8,7 +8,7 @@ This python package is used to create tensorflow side project.
 pip install create_tf_app
 ```
 
-## Create side project 
+## Create a side project 
 
 After installing this package by `pip`, you can simply use `create-tf-app` cli to create a tensorflow app which uses the newest high-level api (i.e. `tf.data.Dataset` and `tf.estimator.Estimator`).
 
@@ -25,13 +25,13 @@ Options:
 
 ## Example: Iris dataset
 
-Use the cli to create example side project.
+Use the cli to create en example side project.
 
 ```
 create-tf-app --app_name=iris_net --use_example=iris --python_interpreter=/your/venv/bin/python
 ```
 
-In `train.py`, we used the `scikit-learn` package to load iris dataset.
+In `train.py`, we used the `scikit-learn` package to load the iris dataset.
 
 ```python
 features, labels = load_iris(return_X_y=True)
