@@ -1,0 +1,57 @@
+{% extends 'estimators/estimator.py.j2' %}
+
+{% block input_fn %}
+        if mode == tf.estimator.ModeKeys.TRAIN:
+            dataset = tf.data.Dataset.from_tensor_slices(data)
+            dataset = dataset.repeat(self.params['num_epochs']).batch(self.params['batch_size']).prefetch(self.params['batch_size'])
+
+            return dataset
+
+        elif mode == tf.estimator.ModeKeys.EVAL:
+            dataset = tf.data.Dataset.from_tensor_slices(data)
+            dataset = dataset.repeat(self.params['num_epochs']).batch(self.params['batch_size']).prefetch(self.params['batch_size'])
+
+            return dataset
+
+        elif mode == tf.estimator.ModeKeys.PREDICT:
+            return NotImplemented
+
+        else:
+            raise Exception('Invalid ModeKey.')
+
+{% endblock %}
+
+{% block forward %}
+        with tf.name_scope('hidden_layers'):
+            net = tf.layers.dense(features, 10, activation=tf.nn.relu)
+            net = tf.layers.dense(net, 10, activation=tf.nn.relu)
+
+        with tf.name_scope('output_layer'):
+            net = tf.layers.dense(net, 3)
+
+        return net
+        
+{% endblock %}
+
+{% block model_fn %}
+        if mode == tf.estimator.ModeKeys.TRAIN:
+            loss = tf.losses.softmax_cross_entropy(tf.one_hot(labels, depth=3), logits)
+            opt = tf.train.AdamOptimizer(learning_rate=params['learning_rate'])
+            train_op = opt.minimize(loss, global_step=tf.train.get_global_step())
+
+        if mode == tf.estimator.ModeKeys.EVAL:
+            loss = tf.losses.softmax_cross_entropy(tf.one_hot(labels, depth=3), logits)
+            eval_metric_ops = {
+                'accuracy': tf.metrics.accuracy(
+                    tf.one_hot(labels, depth=3), tf.one_hot(tf.argmax(logits, axis=1), depth=3), name='accuracy'),
+                'precision': tf.metrics.precision(
+                    tf.one_hot(labels, depth=3), tf.one_hot(tf.argmax(logits, axis=1), depth=3), name='precision'),
+                'recall': tf.metrics.recall(
+                    tf.one_hot(labels, depth=3), tf.one_hot(tf.argmax(logits, axis=1), depth=3), name='recall'),
+                'f1_score': tf.contrib.metrics.f1_score(
+                    tf.one_hot(labels, depth=3), tf.one_hot(tf.argmax(logits, axis=1), depth=3), name='f1_score')
+            }
+
+        elif mode == tf.estimator.ModeKeys.PREDICT:
+                return NotImplemented
+{% endblock %}

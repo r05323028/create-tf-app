@@ -1,0 +1,17 @@
+{% extends 'scripts/train.py.j2' %}
+
+{% block packages %}
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+{% endblock %}
+
+{% block datasets %}
+    features, labels = load_iris(return_X_y=True)
+    train_X, test_X, train_y, test_y = train_test_split(features, labels, test_size=kwargs.get('test_size'))
+    train_data = (train_X, train_y)
+    eval_data = (test_X, test_y)
+{% endblock %}
+
+{% block train %}
+    estimator.train(train_data=train_data, eval_data=eval_data)
+{% endblock %}

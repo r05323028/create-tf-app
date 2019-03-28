@@ -50,8 +50,13 @@ def build_estimator(root_dir, app_name, **kwargs):
     if not os.path.exists(estimator_path):
         with open(estimator_path, 'w') as file:
             env = Environment(loader=PackageLoader('create_tf_app', 'templates'))
-            template = env.get_template('estimators/estimator.py.j2')
-            output = template.render(use_example=kwargs.get('use_example'))
+
+            if kwargs.get('use_example') == 'iris':
+                template = env.get_template('estimators/examples/iris.j2')
+                output = template.render()
+            else:
+                template = env.get_template('estimators/examples/empty.j2')
+                output = template.render()
             file.write(output)
 
 def build_model_scripts(root_dir, app_name, **kwargs):
@@ -59,10 +64,15 @@ def build_model_scripts(root_dir, app_name, **kwargs):
 
     if not os.path.exists(train_py_path):
         env = Environment(loader=PackageLoader('create_tf_app', 'templates'))
-        template = env.get_template('scripts/train.py.j2')
-        output = template.render(
-            app_name=app_name, 
-            use_example=kwargs.get('use_example'))
+
+        if kwargs.get('use_example') == 'iris':
+            template = env.get_template('scripts/examples/iris.j2')
+            output = template.render(app_name=app_name)
+
+        else:
+            template = env.get_template('scripts/examples/empty.j2')
+            output = template.render(app_name=app_name)
+
         with open(train_py_path, 'w') as file:
             file.write(output)
 

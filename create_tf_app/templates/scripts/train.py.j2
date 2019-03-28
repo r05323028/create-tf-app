@@ -1,10 +1,7 @@
 import tensorflow as tf
 from argparse import ArgumentParser
 from {{ app_name }} import Estimator
-{% if use_example %}
-from sklearn.datasets import load_iris
-from sklearn.model_selection import train_test_split
-{% endif %}
+{% block packages %}{% endblock %}
 
 
 def get_args():
@@ -39,17 +36,10 @@ def main(**kwargs):
     )
 
     # load dataset 
-    {% if use_example == 'iris' %}
-    features, labels = load_iris(return_X_y=True)
-    train_X, test_X, train_y, test_y = train_test_split(features, labels, test_size=kwargs.get('test_size'))
-    train_data = (train_X, train_y)
-    eval_data = (test_X, test_y)
-    {% endif %}
+    {% block datasets %}{% endblock %}
 
     # train the estimator
-    {% if use_example == 'iris' %}
-    estimator.train(train_data=train_data, eval_data=eval_data)
-    {% endif %}
+    {% block train %}{% endblock %}
 
 if __name__ == "__main__":
     kwargs = get_args()
