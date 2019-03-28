@@ -1,2 +1,5 @@
 include create_tf_app/templates/*.j2
 include create_tf_app/templates/*/*.j2
+include create_tf_app/templates/*/*/*.j2
+
+

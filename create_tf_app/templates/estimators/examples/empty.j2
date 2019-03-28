@@ -1,0 +1,33 @@
+{% extends 'estimators/estimator.py.j2' %}
+
+{% block input_fn %}
+        if mode == tf.estimator.ModeKeys.TRAIN:
+            return NotImplemented
+
+        elif mode == tf.estimator.ModeKeys.EVAL:
+            return NotImplemented
+
+        elif mode == tf.estimator.ModeKeys.PREDICT:
+            return NotImplemented
+
+        else:
+            raise Exception('Invalid ModeKey.')
+
+{% endblock %}
+
+{% block forward %}
+        return NotImplemented
+        
+{% endblock %}
+
+{% block model_fn %}
+        if mode == tf.estimator.ModeKeys.TRAIN:
+            pass
+
+        if mode == tf.estimator.ModeKeys.EVAL:
+            pass
+
+        if mode == tf.estimator.ModeKeys.PREDICT:
+            pass
+
+{% endblock %}
