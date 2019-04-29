@@ -10,7 +10,7 @@ setup(
     name='create_tf_app',
     version='0.0.3',
     install_requires=[
-        'Jinja2==2.10',
+        'Jinja2==2.10.1',
         'Click==7.0',
         'tqdm==4.23.4'
     ],
